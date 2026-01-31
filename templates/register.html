@@ -1,0 +1,60 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - CodeSpace</title>
+    <link rel="stylesheet" href="{% static 'register.css' %}">
+</head>
+<body>
+    <div class="register-container">
+        <div class="header">
+            <h1>CodeSpace</h1>
+            <p>Join your team and start collaborating</p>
+        </div>
+
+        <div class="form-content">
+            <form method="post" novalidate>
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                    <div class="non-field-errors">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                {% for field in form %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                            {% if field.field.required %}
+                                <span class="required">*</span>
+                            {% endif %}
+                        </label>
+                        {{ field }}
+                        
+                        {% if field.help_text %}
+                            <small class="helptext">{{ field.help_text|safe }}</small>
+                        {% endif %}
+                        
+                        {% if field.errors %}
+                            <ul class="errorlist">
+                                {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <button type="submit" class="submit-btn">Create Account</button>
+
+                {% comment %} <div class="login-link">
+                    Already have an account? <a href="{% url 'login' %}">Sign in</a>
+                </div> {% endcomment %}
+            </form>
+        </div>
+    </div>
+</body>
+</html>

@@ -3,13 +3,13 @@ from django.contrib.auth.models import AbstractUser
 # Create your models here.
 
 
-class CustomUser(models.Model,AbstractUser):
+class CustomUser(AbstractUser):
     ROLE_CHOICES=[
         ('dev','Dev'),
         ('viewer','Viewer')
         
     ]
-    role =  models.CharField(choices=ROLE_CHOICES,default='dev')
+    role =  models.CharField(choices=ROLE_CHOICES,max_length=80,default='dev')
     
     def __str__(self):
         return f"{self.username},{self.role}"
