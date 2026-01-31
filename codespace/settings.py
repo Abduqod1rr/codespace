@@ -76,7 +76,7 @@ WSGI_APPLICATION = 'codespace.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'codespacedb',      # Your database name
+        'NAME': 'codespace',      # Your database name
         'USER': 'codespaceuser',    # Your database user
         'PASSWORD': 'cspcpspwrd', # Your database password
         'HOST': 'localhost',        # Use 'localhost' for local setup
