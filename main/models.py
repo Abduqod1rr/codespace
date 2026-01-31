@@ -6,6 +6,7 @@ from users.models import CustomUser
 class CodeFile(models.Model):
     title= models.CharField(max_length=50,default='no title')
     file=models.FileField(upload_to='/files')
+    comment = models.TextField(blank=True)
     dev=models.ForeignKey(CustomUser,on_delete=models.CASCADE)
     created_at=models.DateTimeField(auto_now_add=True)
     
