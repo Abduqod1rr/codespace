@@ -4,6 +4,7 @@ from .models import CustomUser
 from django.contrib.auth.views import LoginView , LogoutView
 from django.urls import reverse_lazy
 from django.views.generic import CreateView ,DeleteView ,ListView   ,UpdateView
+from django.contrib.auth import logout 
 
 
 class RegisterView(CreateView):
@@ -17,3 +18,9 @@ class login(LoginView):
     template_name= 'login.html'
     fields=['username','password']
     success_url=reverse_lazy('home')
+    
+    
+def logoutuser(request):
+    logout(request)
+    return redirect(reverse_lazy('login'))
+   
