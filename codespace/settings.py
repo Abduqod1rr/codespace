@@ -73,11 +73,14 @@ WSGI_APPLICATION = 'codespace.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'codespacedb',      # Your database name
+        'USER': 'codespaceuser',    # Your database user
+        'PASSWORD': 'cspcpspwrd', # Your database password
+        'HOST': 'localhost',        # Use 'localhost' for local setup
+        'PORT': '',                 # Leave blank to use default port (5432)
     }
 }
 
