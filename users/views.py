@@ -10,4 +10,10 @@ class RegisterView(CreateView):
     model = CustomUser
     form_class=CustomUsercreationForm
     template_name='register.html'
+    success_url=reverse_lazy('login')
+
+
+class login(LoginView):
+    template_name= 'login.html'
+    fields=['username','password']
     success_url=reverse_lazy('home')
