@@ -11,18 +11,32 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-brand">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                </svg>
                 <h1>CodeSpace</h1>
             </div>
             <div class="nav-menu">
                 {% if user.is_authenticated %}
-                    <span class="user-info">Welcome, {{ user.username }}</span>
+                    <div class="user-badge">
+                        <div class="user-avatar">{{ user.username|slice:":1"|upper }}</div>
+                        <span class="user-info">{{ user.username }}</span>
+                        <span class="user-role">{{ user.role|default:"member" }}</span>
+                    </div>
                     {% if user.role == 'dev' %}
-                        <a href="{% url 'create' %}" class="nav-link btn-primary">Create File</a>
+                        <a href="{% url 'create' %}" class="nav-link btn-primary">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            New File
+                        </a>
                     {% endif %}
                     <a href="{% url 'logout' %}" class="nav-link">Logout</a>
                 {% else %}
                     <a href="{% url 'login' %}" class="nav-link">Login</a>
-                    <a href="{% url 'register' %}" class="nav-link btn-primary">Register</a>
+                    <a href="{% url 'register' %}" class="nav-link btn-primary">Get Started</a>
                 {% endif %}
             </div>
         </div>
@@ -30,48 +44,181 @@
 
     <div class="container">
         <div class="header-section">
-            <h2>Code Files</h2>
-            <p>Collaborate with your team on code files</p>
+            <div class="header-content">
+                <h2>Team Code Files</h2>
+                <p>Collaborate and share code with your development team</p>
+            </div>
+            {% if object_list %}
+                <div class="search-box">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    <input type="text" id="searchInput" placeholder="Search files..." />
+                </div>
+            {% endif %}
         </div>
 
         {% if object_list %}
-            <div class="files-grid">
-                {% for file in object_list %}
-                    <div class="file-card">
-                        <div class="file-header">
-                            <h3>{{ file.title }}</h3>
-                            <span class="file-date">{{ file.created_at|date:"M d, Y" }}</span>
-                        </div>
-                        
-                        {% if file.comment %}
-                            <p class="file-comment">{{ file.comment }}</p>
-                        {% endif %}
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span class="stat-number">{{ object_list|length }}</span>
+                    <span class="stat-label">Total Files</span>
+                </div>
+                {% if user.is_authenticated %}
+                    <div class="stat-item">
+                        <span class="stat-number">{{ object_list|length }}</span>
+                        <span class="stat-label">Active Projects</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">{{ user.username }}</span>
+                        <span class="stat-label">Your Account</span>
+                    </div>
+                {% endif %}
+            </div>
 
-                        <div class="file-info">
-                            <span class="file-author">By: {{ file.user.username }}</span>
-                            {% if file.file %}
-                                <a href="{{ file.file.url }}" class="file-download" download>Download</a>
+            <div class="files-grid" id="filesGrid">
+                {% for file in object_list %}
+                    <div class="file-card" data-title="{{ file.title|lower }}" data-author="{{ file.dev.username|lower }}">
+                        <div class="file-icon">
+                            {% if file.file.name|slice:"-3:" == ".py" or file.file.name|slice:"-3:" == ".js" or file.file.name|slice:"-5:" == ".java" %}
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="16 18 22 12 16 6"></polyline>
+                                    <polyline points="8 6 2 12 8 18"></polyline>
+                                </svg>
+                            {% elif file.file.name|slice:"-4:" == ".txt" or file.file.name|slice:"-3:" == ".md" %}
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                            {% else %}
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                                    <polyline points="13 2 13 9 20 9"></polyline>
+                                </svg>
                             {% endif %}
                         </div>
-
-                        {% if user.is_authenticated and user.role == 'dev' %}
-                            <div class="file-actions">
-                                <a href="{% url 'update' file.pk %}" class="btn-edit">Edit</a>
-                                <a href="{% url 'delete' file.pk %}" class="btn-delete">Delete</a>
+                        
+                        <div class="file-content">
+                            <div class="file-header">
+                                <h3>{{ file.title }}</h3>
+                                <span class="file-date">{{ file.created_at|date:"M d, Y" }}</span>
                             </div>
-                        {% endif %}
+                            
+                            {% if file.comment %}
+                                <p class="file-comment">{{ file.comment|truncatewords:20 }}</p>
+                            {% else %}
+                                <p class="file-comment no-comment">No description provided</p>
+                            {% endif %}
+
+                            <div class="file-footer">
+                                <div class="file-author-info">
+                                    <div class="author-avatar">{{ file.dev.username|slice:":1"|upper }}</div>
+                                    <span class="file-author">{{ file.dev.username }}</span>
+                                </div>
+                                
+                                {% if file.file %}
+                                    <a href="{{ file.file.url }}" class="file-download" download title="Download file">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                            <polyline points="7 10 12 15 17 10"></polyline>
+                                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                                        </svg>
+                                    </a>
+                                {% endif %}
+                            </div>
+
+                            {% if user.is_authenticated and user.role == 'dev' %}
+                                <div class="file-actions">
+                                    <a href="{% url 'update' file.pk %}" class="btn-edit">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                        </svg>
+                                        Edit
+                                    </a>
+                                    <a href="{% url 'delete' file.pk %}" class="btn-delete">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="3 6 5 6 21 6"></polyline>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                        </svg>
+                                        Delete
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
                 {% endfor %}
             </div>
+
+            <div id="noResults" class="empty-state" style="display: none;">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <h3>No files found</h3>
+                <p>Try adjusting your search terms</p>
+            </div>
         {% else %}
             <div class="empty-state">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                    <polyline points="13 2 13 9 20 9"></polyline>
+                </svg>
                 <h3>No files yet</h3>
-                <p>Start by creating your first code file</p>
+                <p>Start building your team's code repository</p>
                 {% if user.is_authenticated and user.role == 'dev' %}
-                    <a href="{% url 'create' %}" class="btn-primary">Create First File</a>
+                    <a href="{% url 'create' %}" class="btn-primary">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Create First File
+                    </a>
+                {% elif not user.is_authenticated %}
+                    <a href="{% url 'register' %}" class="btn-primary">Get Started</a>
                 {% endif %}
             </div>
         {% endif %}
     </div>
+
+    <script>
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const filesGrid = document.getElementById('filesGrid');
+        const noResults = document.getElementById('noResults');
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const fileCards = document.querySelectorAll('.file-card');
+                let visibleCount = 0;
+
+                fileCards.forEach(card => {
+                    const title = card.dataset.title;
+                    const author = card.dataset.author;
+                    
+                    if (title.includes(searchTerm) || author.includes(searchTerm)) {
+                        card.style.display = 'flex';
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                // Show/hide no results message
+                if (visibleCount === 0) {
+                    filesGrid.style.display = 'none';
+                    noResults.style.display = 'flex';
+                } else {
+                    filesGrid.style.display = 'grid';
+                    noResults.style.display = 'none';
+                }
+            });
+        }
+    </script>
 </body>
 </html>

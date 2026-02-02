@@ -2,7 +2,7 @@ from django.shortcuts import render
 from .models import CodeFile
 from django.urls import reverse_lazy
 from django.views.generic import CreateView ,DeleteView ,ListView   ,UpdateView
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin , UserPassesTestMixin
 
 
 class CodeFileListView(ListView):
@@ -11,7 +11,7 @@ class CodeFileListView(ListView):
 
 
 
-class CreateFile(LoginRequiredMixin,CreateView):
+class CreateFile(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model=CodeFile
     fields = ['title','file','comment']
     template_name='create.html'
@@ -21,7 +21,7 @@ class CreateFile(LoginRequiredMixin,CreateView):
         return self.request.user.role=='dev'
     
     def form_valid(self, form):
-        form.instance.dev=self.requst.user
+        form.instance.dev=self.request.user
         return super().form_valid
 
 
@@ -34,3 +34,15 @@ class UpdateFile(LoginRequiredMixin,UpdateView):
     
     def test_func(self):
         return self.request.user.role=='dev'
+
+
+
+class FileDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = CodeFile
+    template_name = 'delete.html'
+    success_url= reverse_lazy('home')
+    
+    def test_func(self):
+        return self.request.user == self.get_object().dev
+        
+    
