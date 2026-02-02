@@ -46,17 +46,22 @@
         <div class="header-section">
             <div class="header-content">
                 <h2>Team Code Files</h2>
-                <p>Collaborate and share code with your development team</p>
+                {% if request.GET.q %}
+                    <p>Search results for: <strong>"{{ request.GET.q }}"</strong> - <a href="{% url 'home' %}" style="color: #1e40af;">Clear search</a></p>
+                {% else %}
+                    <p>Collaborate and share code with your development team</p>
+                {% endif %}
             </div>
-            {% if object_list %}
+            <form method="get" action="{% url 'home' %}" class="search-form">
                 <div class="search-box">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="11" cy="11" r="8"></circle>
                         <path d="m21 21-4.35-4.35"></path>
                     </svg>
-                    <input type="text" id="searchInput" placeholder="Search files..." />
+                    <input type="text" name="q" id="searchInput" placeholder="Search files..." value="{{ request.GET.q }}" />
+                    <button type="submit" class="search-btn">Search</button>
                 </div>
-            {% endif %}
+            </form>
         </div>
 
         {% if object_list %}
@@ -186,37 +191,19 @@
     </div>
 
     <script>
-        // Search functionality
+        // Optional: Auto-submit search on typing (with debounce)
+        let searchTimeout;
         const searchInput = document.getElementById('searchInput');
-        const filesGrid = document.getElementById('filesGrid');
-        const noResults = document.getElementById('noResults');
-
-        if (searchInput) {
-            searchInput.addEventListener('input', function(e) {
-                const searchTerm = e.target.value.toLowerCase();
-                const fileCards = document.querySelectorAll('.file-card');
-                let visibleCount = 0;
-
-                fileCards.forEach(card => {
-                    const title = card.dataset.title;
-                    const author = card.dataset.author;
-                    
-                    if (title.includes(searchTerm) || author.includes(searchTerm)) {
-                        card.style.display = 'flex';
-                        visibleCount++;
-                    } else {
-                        card.style.display = 'none';
+        const searchForm = document.querySelector('.search-form');
+        
+        if (searchInput && searchForm) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    if (searchInput.value.length >= 2 || searchInput.value.length === 0) {
+                        searchForm.submit();
                     }
-                });
-
-                // Show/hide no results message
-                if (visibleCount === 0) {
-                    filesGrid.style.display = 'none';
-                    noResults.style.display = 'flex';
-                } else {
-                    filesGrid.style.display = 'grid';
-                    noResults.style.display = 'none';
-                }
+                }, 500); // Wait 500ms after user stops typing
             });
         }
     </script>
