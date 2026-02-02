@@ -19,6 +19,10 @@ class CreateFile(LoginRequiredMixin,CreateView):
     
     def test_func(self):
         return self.request.user.role=='dev'
+    
+    def form_valid(self, form):
+        form.instance.dev=self.requst.user
+        return super().form_valid
 
 
 
